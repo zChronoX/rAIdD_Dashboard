@@ -59,6 +59,21 @@ Una volta che Docker ha terminato l'avvio, puoi accedere all'interfaccia web tra
 
 ---
 
+## Test della Funzionalità di Upload
+
+Per testare correttamente il motore di importazione e la visualizzazione dei grafici clinici, è necessario disporre di un archivio **ZIP** ottenuto tramite **Google Takeout**. 
+
+Poiché il sistema ha natura prototipale e non prevede l'integrazione diretta con le API proprietarie di Fitbit, il caricamento dei dati si basa sulla procedura di **estrazione manuale** e condivisione tramite cloud descritta nei requisiti operativi del progetto.
+
+### Istruzioni per il test:
+1. **Ottenimento dati:** Seguire la procedura di esportazione dati Google Takeout per l'account associato al dispositivo Fitbit Inspire 3.
+2. **Caricamento:** Utilizzare il file ZIP generato nella sezione "Upload Dati" della dashboard.
+3. **Elaborazione:** Il sistema analizzerà i file JSON contenuti nell'archivio (es. frequenza cardiaca, passi, sonno) per calcolare le medie giornaliere e popolare automaticamente la dashboard statistica e il profilo clinico del paziente.
+
+> **Nota:** Il caricamento di uno ZIP non conforme agli standard di Google Takeout o privo dei file di telemetria necessari potrebbe causare errori di validazione durante il parsing.
+
+---
+
 ## Struttura del Repository
 
 L'organizzazione dei file segue gli standard delle applicazioni web Python/Flask containerizzate, con una netta separazione tra logica di backend, asset statici e template HTML:
