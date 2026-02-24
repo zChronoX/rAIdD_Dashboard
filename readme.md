@@ -8,7 +8,7 @@ Il sistema è interamente containerizzato: questo significa che **non è necessa
 ## Guida all'Avvio Rapido (Build & Deploy)
 
 ### Prerequisiti
-Per far partire il progetto sul tuo computer, hai bisogno solo di uno strumento gratuito:
+Per far partire il progetto sul tuo computer, hai bisogno solo di uno strumento:
 * **Docker Desktop:** Il motore che farà girare l'applicazione in un ambiente virtuale isolato. (Scaricabile da docker.com)
 
 **Attenzione:** Dopo aver installato Docker Desktop, assicurati di avviarlo (devi vedere l'icona della balena nella barra delle applicazioni o la scritta "Engine Running" nel programma) prima di procedere con i passaggi successivi.
