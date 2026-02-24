@@ -59,6 +59,24 @@ Una volta che Docker ha terminato l'avvio, puoi accedere all'interfaccia web tra
 
 ---
 
+## Spegnimento e Rimozione dei Servizi
+
+Per interrompere l'esecuzione della piattaforma e liberare le risorse di sistema, è possibile utilizzare i seguenti comandi all'interno della cartella di progetto:
+
+### Arresto dei Container
+Per fermare i servizi mantenendo i container pronti per un riavvio rapido:
+```bash
+docker-compose stop
+```
+
+Per arrestare i servizi e rimuovere definitivamente i container, è sufficiente eseguire questo comando:
+```bash
+docker-compose down -v
+```
+> **Nota:** Eseguire quest'ultimo comando, cancellerà i volumi associati ai container, causando una perdita di tutti i dati della dashboard.
+
+---
+
 ## Test della Funzionalità di Upload
 
 Per testare correttamente il motore di importazione e la visualizzazione dei grafici clinici, è necessario disporre di un archivio **ZIP** ottenuto tramite **Google Takeout**. 
