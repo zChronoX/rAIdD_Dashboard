@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <title>rAIdD - Esito Upload</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">rAIdD Dashboard</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/pazienti">Pazienti</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dispositivi">Dispositivi</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/assegnazioni">Assegnazioni</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/upload">Upload Dati</a></li>
+                </ul>
+            </div>
+            <div class="d-flex">
+                <span class="navbar-text me-3">Operatore: {{ username }}</span>
+                <a href="/logout" class="btn btn-outline-danger btn-sm">Esci</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container d-flex justify-content-center align-items-center upload-container">
+        <div class="card border-0 shadow-sm upload-card">
+            <div class="card-body text-center p-5">
+
+                <div class="mb-4">
+                    {% if 'SUCCESSO' in messaggio %}
+                    <i class="bi bi-check-circle-fill text-success upload-icon"></i>
+                    {% elif 'NESSUNA MODIFICA' in messaggio %}
+                    <i class="bi bi-exclamation-triangle-fill text-warning upload-icon"></i>
+                    {% else %}
+                    <i class="bi bi-exclamation-triangle-fill text-danger upload-icon"></i>
+                    {% endif %}
+                </div>
+
+                <h2 class="h3 mb-3 fw-bold text-secondary">
+                    {% if 'SUCCESSO' in messaggio %}
+                    Elaborazione Completata
+                    {% elif 'NESSUNA MODIFICA' in messaggio %}
+                    Nessuna modifica
+                    {% else %}
+                    Errore durante l'importazione
+                    {% endif %}
+                </h2>
+
+                <p class="text-muted mb-4 fs-5 upload-message">
+                    {{ messaggio }}
+                </p>
+
+                <hr class="my-4 text-muted opacity-25">
+
+                <div class="d-grid gap-2 col-md-10 mx-auto">
+                    {% if 'SUCCESSO' in messaggio %}
+                    <a href="/paziente/{{ paziente_id }}" class="btn btn-primary btn-lg py-2 shadow-sm">
+                        Visualizza Grafici Paziente
+                    </a>
+                    {% endif %}
+
+                    <a href="/upload" class="btn btn-outline-secondary py-2">
+                        Carica un altro file
+                    </a>
+
+                    <a href="/" class="btn btn-link text-decoration-none mt-2">Torna alla Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

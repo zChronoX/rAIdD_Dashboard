@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <title>rAIdD - Storico Dispositivo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">rAIdD Dashboard</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/pazienti">Pazienti</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/dispositivi">Dispositivi</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/assegnazioni">Assegnazioni</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/upload">Upload Dati</a></li>
+                </ul>
+            </div>
+            <div class="d-flex">
+                <span class="navbar-text me-3">Operatore: {{ username }}</span>
+                <a href="/logout" class="btn btn-outline-danger btn-sm">Esci</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Storico Assegnazioni Dispositivo: <span class="text-primary">{{ dispositivo.id }}</span></h2>
+            <a href="/dispositivi" class="btn btn-secondary">Torna a Dispositivi</a>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <p class="mb-1"><strong>Modello:</strong> {{ dispositivo.modello }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p class="mb-1"><strong>Stato Logistico:</strong> <span class="badge bg-dark">{{
+                                dispositivo.stato }}</span></p>
+                    </div>
+                    <div class="col-md-4">
+                        <p class="mb-1"><strong>Ultima Batteria:</strong> {{ dispositivo.batteria if
+                            dispositivo.batteria else 'N/D' }}%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Cronologia Utilizzo</h5>
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Paziente (ID)</th>
+                            <th>Regione</th>
+                            <th>Data Inizio</th>
+                            <th>Data Fine</th>
+                            <th>Stato</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in storico %}
+                        <tr>
+                            <td><strong>{{ record.paziente_id }}</strong></td>
+                            <td>{{ record.regione }}</td>
+                            <td>{{ record.data_inizio }}</td>
+                            <td>{{ record.data_fine }}</td>
+                            <td>
+                                {% if record.stato_assegnazione == 'Attiva' %}
+                                <span class="badge bg-success">Attiva</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Conclusa</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">Nessuno storico disponibile per questo
+                                dispositivo.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

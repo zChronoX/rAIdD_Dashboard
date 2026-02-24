@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <title>rAIdD - Gestione Dispositivi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">rAIdD Dashboard</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/pazienti">Pazienti</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/dispositivi">Dispositivi</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/assegnazioni">Assegnazioni</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/upload">Upload Dati</a></li>
+                </ul>
+            </div>
+            <div class="d-flex">
+                <span class="navbar-text me-3">Operatore: {{ username }}</span>
+                <a href="/logout" class="btn btn-outline-danger btn-sm">Esci</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Gestione Dispositivi</h2>
+            <button class="btn btn-success fw-bold" data-bs-toggle="modal" data-bs-target="#aggiungiDispositivoModal">
+                Aggiungi Dispositivo
+            </button>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID Dispositivo</th>
+                            <th>Modello</th>
+                            <th>Batteria</th>
+                            <th>Ultima Sincronizzazione</th>
+                            <th>Stato</th>
+                            <th>Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in dispositivi %}
+                        <tr>
+                            <td><strong>{{ d.id }}</strong></td>
+                            <td>{{ d.modello }}</td>
+                            <td>
+                                {% if d.batteria %}
+                                <div class="d-flex align-items-center">
+                                    <div class="progress flex-grow-1 me-2 progress-battery">
+                                        <div class="progress-bar barra-batteria
+                                                {% if d.batteria|int <= 15 %}bg-danger
+                                                {% elif d.batteria|int <= 50 %}bg-warning
+                                                {% else %}bg-success{% endif %}" role="progressbar"
+                                            data-batteria="{{ d.batteria }}">
+                                        </div>
+                                    </div>
+                                    <span class="small fw-bold {% if d.batteria|int <= 15 %}text-danger{% endif %}">{{
+                                        d.batteria }}%</span>
+                                </div>
+                                {% else %}
+                                <span class="text-muted">N/D</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ d.ultima_sincronizzazione if d.ultima_sincronizzazione else 'N/D' }}</td>
+                            <td>
+                                {% if d.stato == 'Disponibile' %}
+                                <span class="badge bg-success">Disponibile</span>
+                                {% elif d.stato == 'In Uso' or d.stato == 'Assegnato' %}
+                                <span class="badge bg-primary">In Uso</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ d.stato }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                                    data-bs-target="#modificaModal{{ d.id }}">Modifica</button>
+
+                                <a href="{{ url_for('main.storico_dispositivo', id=d.id) }}"
+                                    class="btn btn-sm btn-info text-white fw-bold">Vedi Storico</a>
+
+                                {% if d.stato != 'Assegnato' and d.stato != 'In Uso' and d.stato != 'Manutenzione' %}
+                                <form action="{{ url_for('main.elimina_dispositivo', id=d.id) }}" method="POST"
+                                    class="d-inline"
+                                    onsubmit="return confirm('Sei sicuro di voler eliminare definitivamente questo dispositivo?');">
+                                    <button type="submit" class="btn btn-sm btn-danger fw-bold">Elimina</button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">Nessun dispositivo inserito al momento.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% for d in dispositivi %}
+    <div class="modal fade" id="modificaModal{{ d.id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modifica Dispositivo: {{ d.id }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{{ url_for('main.modifica_dispositivo', id=d.id) }}" method="POST">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Modello</label>
+                            <input type="text" class="form-control" name="modello" value="{{ d.modello }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Livello Batteria (%)</label>
+                            <input type="number" class="form-control" name="batteria" min="0" max="100"
+                                value="{{ d.batteria if d.batteria else '' }}">
+                            <div class="form-text small">Lasciare vuoto se sconosciuta. Inserire 0
+                                per disabilitare l'assegnazione.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Stato Logistico</label>
+                            {% if d.stato == 'In Uso' or d.stato == 'Assegnato' %}
+                            <input type="text" class="form-control"
+                                value="In Uso (Bloccato: il paziente deve prima restituirlo)" disabled>
+                            {% else %}
+                            <select class="form-select" name="stato" required>
+                                <option value="Disponibile" {% if d.stato=='Disponibile' %}selected{% endif %}>
+                                    Disponibile</option>
+                                <option value="Manutenzione" {% if d.stato=='Manutenzione' %}selected{% endif %}>In
+                                    Manutenzione</option>
+                            </select>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                        <button type="submit" class="btn btn-primary">Salva Modifiche</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="modal fade" id="aggiungiDispositivoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Aggiungi Nuovo Dispositivo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{{ url_for('main.gestisci_dispositivi') }}" method="POST">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="id_dispositivo" class="form-label">ID Dispositivo (Seriale)</label>
+                            <input type="text" class="form-control" id="id_dispositivo" name="id"
+                                placeholder="Es. DEV-001" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="modello" class="form-label">Modello</label>
+                            <input type="text" class="form-control" id="modello" name="modello" value="Fitbit Inspire 3"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="batteria_new" class="form-label">Livello Batteria (%)</label>
+                            <input type="number" class="form-control" id="batteria_new" name="batteria" min="0"
+                                max="100" placeholder="Es. 100">
+                        </div>
+                        <div class="mb-3">
+                            <label for="stato_new" class="form-label">Stato Iniziale</label>
+                            <select class="form-select" id="stato_new" name="stato" required>
+                                <option value="Disponibile" selected>Disponibile</option>
+                                <option value="Manutenzione">In Manutenzione</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                        <button type="submit" class="btn btn-primary">Salva Dispositivo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/dispositivi.js') }}"></script>
+</body>
+
+</html>

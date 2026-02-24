@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  web:
+    # Costruisce l'immagine dell'app partendo dal Dockerfile locale
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      # Sincronizza il codice locale col container per ricaricare le modifiche in tempo reale (Hot-reload)
+      - .:/app  
+    environment:
+      - FLASK_ENV=development
+      # URL di connessione al DB: usa il nome del servizio 'db' come hostname
+      - DATABASE_URL=postgresql://user:password@db:5432/raidd_db
+    depends_on:
+      db:
+        # Aspetta che il database sia pronto ad accettare connessioni prima di avviare Flask
+        condition: service_healthy
+
+  db:
+    image: postgres:13
+    environment:
+      # Credenziali di default per l'ambiente di sviluppo locale
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=raidd_db
+    volumes:
+      # Rende i dati del database persistenti anche se il container viene distrutto
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      # Verifica attivamente se Postgres e' pronto a ricevere query
+      test: ["CMD-SHELL", "pg_isready -U user -d raidd_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  # Definizione del volume persistente per Postgres
+  postgres_data:

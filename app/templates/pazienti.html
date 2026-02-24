@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <title>rAIdD - Gestione Pazienti</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">rAIdD Dashboard</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/pazienti">Pazienti</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dispositivi">Dispositivi</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/assegnazioni">Assegnazioni</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/upload">Upload Dati</a></li>
+                </ul>
+            </div>
+            <div class="d-flex">
+                <span class="navbar-text me-3">Operatore: {{ username }}</span>
+                <a href="/logout" class="btn btn-outline-danger btn-sm">Esci</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2 class="mb-4">Gestione Pazienti</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Aggiungi Paziente</h5>
+                        <form action="{{ url_for('main.gestisci_pazienti') }}" method="POST">
+                            <div class="mb-3">
+                                <label class="form-label">ID Paziente (Pseudonimo)</label>
+                                <input type="text" class="form-control" name="id" placeholder="es. raid.ct01" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="regione" class="form-label">Regione</label>
+                                <select class="form-select" id="regione" name="regione" required>
+                                    <option value="" selected disabled>Seleziona una regione...</option>
+                                    <option value="Abruzzo">Abruzzo</option>
+                                    <option value="Basilicata">Basilicata</option>
+                                    <option value="Calabria">Calabria</option>
+                                    <option value="Campania">Campania</option>
+                                    <option value="Emilia-Romagna">Emilia-Romagna</option>
+                                    <option value="Friuli-Venezia Giulia">Friuli-Venezia Giulia</option>
+                                    <option value="Lazio">Lazio</option>
+                                    <option value="Liguria">Liguria</option>
+                                    <option value="Lombardia">Lombardia</option>
+                                    <option value="Marche">Marche</option>
+                                    <option value="Molise">Molise</option>
+                                    <option value="Piemonte">Piemonte</option>
+                                    <option value="Puglia">Puglia</option>
+                                    <option value="Sardegna">Sardegna</option>
+                                    <option value="Sicilia">Sicilia</option>
+                                    <option value="Toscana">Toscana</option>
+                                    <option value="Trentino-Alto Adige">Trentino-Alto Adige</option>
+                                    <option value="Umbria">Umbria</option>
+                                    <option value="Valle d'Aosta">Valle d'Aosta</option>
+                                    <option value="Veneto">Veneto</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Provincia (Sigla)</label>
+                                <input type="text" class="form-control" name="provincia" placeholder="es. CT" required
+                                    maxlength="2">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Latitudine</label>
+                                    <input type="number" step="any" class="form-control" name="latitudine"
+                                        placeholder="es. 37.5" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Longitudine</label>
+                                    <input type="number" step="any" class="form-control" name="longitudine"
+                                        placeholder="es. 15.0" required>
+                                </div>
+                            </div>
+
+                            <hr class="text-muted">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Nazione</label>
+                                    <input type="text" class="form-control" name="nazione" value="IT"
+                                        placeholder="es. IT">
+                                </div>
+                                <div class="col-md-8 mb-3">
+                                    <label class="form-label">Fuso Orario</label>
+                                    <input type="text" class="form-control" name="fuso_orario" value="Europe / Rome"
+                                        placeholder="es. Europe / Rome">
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Data Attivazione</label>
+                                <input type="date" class="form-control" name="data_attivazione">
+                                <div class="form-text small text-muted">Se lasciato vuoto, il sistema imposterà in
+                                    automatico la data odierna.</div>
+                            </div>
+
+                            <button type="submit" class="btn btn-success w-100 fw-bold">Salva Paziente</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Elenco Pazienti</h5>
+                        <table class="table table-striped table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Regione</th>
+                                    <th>Provincia</th>
+                                    <th>Coordinate (Lat, Lng)</th>
+                                    <th>Stato</th>
+                                    <th>Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in pazienti %}
+                                <tr>
+                                    <td><strong>{{ p.id }}</strong></td>
+                                    <td>{{ p.regione }}</td>
+                                    <td>{{ p.provincia }}</td>
+                                    <td>{{ p.latitudine }}, {{ p.longitudine }}</td>
+                                    <td>
+                                        {% if p.stato_calcolato == 'Attivo' %}
+                                        <span class="badge bg-success">Attivo</span>
+                                        {% elif p.stato_calcolato == 'Restituito' %}
+                                        <span class="badge bg-secondary">Restituito</span>
+                                        {% else %}
+                                        <span class="badge bg-warning text-dark">Da Assegnare</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('main.profilo_paziente', id=p.id) }}"
+                                            class="btn btn-sm btn-info fw-bold">Vedi Dati</a>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">Nessun paziente inserito al
+                                        momento.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

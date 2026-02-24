@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <title>rAIdD - Gestione Assegnazioni</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">rAIdD Dashboard</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/"> Dashboard </a></li>
+                    <li class="nav-item"><a class="nav-link" href="/pazienti"> Pazienti </a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dispositivi"> Dispositivi </a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/assegnazioni"> Assegnazioni </a></li>
+                    <li class="nav-item"><a class="nav-link" href="/upload"> Upload Dati </a></li>
+                </ul>
+            </div>
+            <div class="d-flex">
+                <span class="navbar-text me-3"> Operatore: {{ username }} </span>
+                <a href="/logout" class="btn btn-outline-danger btn-sm"> Esci </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2 class="mb-4"> Gestione assegnazioni dispositivi </h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0"> Associa Dispositivo </h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('main.gestisci_assegnazioni') }}" method="POST">
+                            <input type="hidden" name="azione" value="assegna">
+
+                            <div class="mb-3">
+                                <label class="form-label"> Paziente </label>
+                                <select class="form-select" name="paziente_id" required>
+                                    <option value=""> Seleziona Paziente... </option>
+                                    {% for p in pazienti %}
+                                    <option value="{{ p.id }}">{{ p.id }} ({{ p.regione }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label"> Dispositivo Disponibile </label>
+                                <select class="form-select" name="dispositivo_id" required>
+                                    <option value=""> Seleziona Fitbit... </option>
+                                    {% for d in dispositivi %}
+                                    <option value="{{ d.id }}">{{ d.id }} ({{ d.modello }})</option>
+                                    {% endfor %}
+                                </select>
+                                {% if not dispositivi %}
+                                <small class="text-danger mt-1 d-block">Nessun dispositivo disponibile al
+                                    momento.</small>
+                                {% endif %}
+                            </div>
+
+                            <button type="submit" class="btn btn-success w-100" {% if not dispositivi %}disabled{% endif
+                                %}>
+                                Conferma Assegnazione
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title"> Dispositivi assegnati attualmente </h5>
+                        <table class="table table-striped table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th> Paziente </th>
+                                    <th> Dispositivo </th>
+                                    <th> Data Assegnazione </th>
+                                    <th> Azione </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for a in assegnazioni %}
+                                <tr>
+                                    <td><strong>{{ a.paziente_id }}</strong></td>
+                                    <td>{{ a.dispositivo_id }}</td>
+                                    <td>{{ a.data_assegnazione.strftime('%d/%m/%Y %H:%M') }}</td>
+                                    <td>
+                                        <form action="{{ url_for('main.gestisci_assegnazioni') }}" method="POST"
+                                            class="d-inline">
+                                            <input type="hidden" name="azione" value="restituisci">
+                                            <input type="hidden" name="assegnazione_id" value="{{ a.id }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-warning"
+                                                onclick="return confirm('Confermi la restituzione del dispositivo?');">
+                                                Registra restituzione
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-3"> Nessun dispositivo attualmente
+                                        assegnato a un paziente. </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

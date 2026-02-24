@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <title>rAIdD - Upload Dati</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">rAIdD Dashboard</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/pazienti">Pazienti</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dispositivi">Dispositivi</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/assegnazioni">Assegnazioni</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/upload">Upload Dati</a></li>
+                </ul>
+            </div>
+            <div class="d-flex">
+                <span class="navbar-text me-3">Operatore: {{ username }}</span>
+                <a href="/logout" class="btn btn-outline-danger btn-sm">Esci</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow border-0 rounded-3">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h4 class="mb-0"> Importa dati paziente
+                        </h4>
+                    </div>
+                    <div class="card-body p-4">
+
+                        <div class="alert alert-info mb-4 border-0 shadow-sm">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <strong>Elaborazione risultati:</strong> Carica il file <code>.zip</code> di sistema.
+                            La piattaforma identifichera in automatico l'ID utente, creera o aggiornera la sua scheda
+                            logistica (Regione, Fuso Orario, Data Attivazione) e registrera il modello esatto di
+                            hardware in uso.
+                        </div>
+
+                        <form action="/upload" method="POST" enctype="multipart/form-data">
+
+                            <div class="mb-4">
+                                <label for="file" class="form-label fw-bold">Seleziona File ZIP</label>
+                                <input type="file" class="form-control form-control-lg" name="file" id="file"
+                                    accept=".zip" required>
+                            </div>
+
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-success btn-lg py-3 fw-bold shadow-sm">
+                                    Avvia Analisi e Sincronizzazione
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer text-muted text-center py-3 bg-light">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

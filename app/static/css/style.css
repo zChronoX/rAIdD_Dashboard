@@ -1,0 +1,79 @@
+/*STILI GENERALI E UTILITIES*/
+
+
+/*PAGINA DI LOGIN*/
+.login-page-body {
+    height: 100vh;
+}
+
+.login-card {
+    width: 400px;
+}
+
+
+/*Colore viola personalizzato per i badge del sonno */
+.text-purple {
+    color: #6f42c1 !important;
+}
+
+/*CONTENITORI GRAFICI (CHART.JS)*/
+
+/*Chart.js richiede che il canvas sia "ingabbiato" in un contenitore
+   con position relative e dimensioni fisse per evitare loop di ridimensionamento 
+   che porterebbero al blocco della pagina.
+*/
+
+/*Contenitore standard per grafici a griglia (BPM, SpO2, Passi, Attività) */
+.chart-container {
+    position: relative;
+    height: 250px;
+    width: 100%;
+}
+
+/*Contenitore specifico per il grafico del sonno (più compatto e centrato) */
+.chart-container-sleep {
+    position: relative;
+    height: 200px;
+    width: 80%;
+    margin: 0 auto;
+}
+
+/*MAPPA GEOGRAFICA (DASHBOARD)*/
+.map-container {
+    height: 500px;
+    width: 100%;
+    z-index: 1;
+    /* Necessario per evitare che la mappa si sovrapponga alle modali/navbar */
+}
+
+/*CONTENITORI GRAFICI (DASHBOARD)*/
+.chart-container-donut {
+    width: 70%;
+    margin: 0 auto;
+    /* Centra il grafico nel suo div genitore */
+}
+
+/*BARRE DI PROGRESSIONE (BATTERIA DISPOSITIVI)*/
+.progress-battery {
+    height: 10px;
+    width: 60px;
+}
+
+/*PAGINA RISULTATO UPLOAD*/
+.upload-container {
+    min-height: 70vh;
+}
+
+.upload-card {
+    max-width: 600px;
+    width: 100%;
+    border-radius: 12px;
+}
+
+.upload-icon {
+    font-size: 5rem;
+}
+
+.upload-message {
+    line-height: 1.6;
+}

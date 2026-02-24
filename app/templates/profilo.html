@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <title>rAIdD - Scheda Paziente</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">rAIdD Dashboard</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/pazienti">Pazienti</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dispositivi">Dispositivi</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/assegnazioni">Assegnazioni</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/upload">Upload Dati</a></li>
+                </ul>
+            </div>
+            <div class="d-flex">
+                <span class="navbar-text me-3">Operatore: {{ username }}</span>
+                <a href="/logout" class="btn btn-outline-danger btn-sm">Esci</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Dettagli Paziente: {{ paziente.id }}
+                {% if paziente.stato_calcolato == 'Attivo' %}
+                <span class="badge bg-success fs-5 ms-3">Attivo</span>
+                {% elif paziente.stato_calcolato == 'Restituito' %}
+                <span class="badge bg-secondary fs-5 ms-3">Restituito</span>
+                {% else %}
+                <span class="badge bg-warning text-dark fs-5 ms-3">Da Assegnare</span>
+                {% endif %}
+            </h2>
+            <div>
+                <div class="d-flex">
+                    <button type="button" class="btn btn-warning me-2 fw-bold" data-bs-toggle="modal"
+                        data-bs-target="#editModal">
+                        <i class="bi bi-pencil-square me-1"></i> Modifica Dati
+                    </button>
+
+                    <form action="/paziente/{{ paziente.id }}/elimina" method="POST" class="me-2"
+                        onsubmit="return confirm('ATTENZIONE: Sei sicuro di voler eliminare definitivamente questo paziente? Tutti i dispositivi assegnati verranno scollegati e torneranno disponibili a magazzino.');">
+                        <button type="submit" class="btn btn-danger fw-bold">
+                            <i class="bi bi-trash3-fill me-1"></i> Elimina
+                        </button>
+                    </form>
+
+                    <a href="/pazienti" class="btn btn-secondary fw-bold">Torna alla Lista</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-secondary text-white fw-bold">Dettagli Geografici e Logistici</div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><strong>Nazione:</strong> {{ paziente.nazione or 'N/D' }}</li>
+                            <li class="list-group-item"><strong>Regione:</strong> {{ paziente.regione or 'N/D' }}</li>
+                            <li class="list-group-item"><strong>Provincia:</strong> {{ paziente.provincia or 'N/D' }}
+                            </li>
+                            <li class="list-group-item"><strong>Latitudine:</strong> {{ paziente.latitudine or 'N/D' }}
+                            </li>
+                            <li class="list-group-item"><strong>Longitudine:</strong> {{ paziente.longitudine or 'N/D'
+                                }}</li>
+                            <li class="list-group-item"><strong>Fuso Orario:</strong>
+                                <code>{{ paziente.fuso_orario or 'N/D' }}</code></li>
+                            <li class="list-group-item"><strong>Data Attivazione:</strong> {{ paziente.data_attivazione
+                                or 'N/D' }}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-dark text-white fw-bold">Stato Dispositivo</div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <strong>Hardware Assegnato:</strong>
+                                {% if dispositivo != 'Nessuno' %}
+                                <span class="badge bg-success fs-6">{{ dispositivo }} {% if dispositivo_obj %}({{
+                                    dispositivo_obj.modello }}){% endif %}</span>
+                                {% else %}
+                                <span class="badge bg-warning text-dark fs-6">Nessuno</span>
+                                {% endif %}
+                            </li>
+
+                            {% if dispositivo_obj %}
+                            <li class="list-group-item">
+                                <strong>Livello Batteria:</strong>
+                                {% if dispositivo_obj.batteria %}
+                                {{ dispositivo_obj.batteria }}%
+                                {% else %}
+                                N/D
+                                {% endif %}
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Ultima Sincronizzazione:</strong> <br>
+                                <code>{{ dispositivo_obj.ultima_sincronizzazione or 'N/D' }}</code>
+                            </li>
+                            {% endif %}
+
+                            <li class="list-group-item"><strong>Data di Assegnazione:</strong> {{ data_assegnazione }}
+                            </li>
+                            <li class="list-group-item text-muted mt-3">
+                                <em>I dettagli hardware vengono aggiornati automaticamente tramite l'upload dei log di
+                                    sistema o dopo l'assegnazione.</em>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div
+                        class="card-header bg-danger text-white fw-bold d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-heart-pulse-fill me-2"></i> Monitoraggio Clinico (Ultimi 5 Giorni)</span>
+                        <button class="btn btn-sm btn-light fw-bold text-danger" data-bs-toggle="modal"
+                            data-bs-target="#modalStoricoCompleto">
+                            <i class="bi bi-graph-up me-1"></i> Vedi Storico Completo
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="noDataAlert" class="alert alert-info d-none text-center">
+                            Nessun dato biometrico registrato per questo paziente. Effettuare l'upload dei dati.
+                        </div>
+
+                        <div id="chartsContainer" data-id="{{ paziente.id }}">
+
+                            <div class="row text-center g-2 mb-4">
+                                <div class="col">
+                                    <div class="card bg-light border-0 shadow-sm">
+                                        <div class="card-body p-2"><small class="text-muted fw-bold">MEDIA BPM</small>
+                                            <h5 class="mb-0 text-danger fw-bold" id="avgBpm">-</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="card bg-light border-0 shadow-sm">
+                                        <div class="card-body p-2"><small class="text-muted fw-bold">MEDIA SpO2</small>
+                                            <h5 class="mb-0 text-primary fw-bold" id="avgSpo2">-</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="card bg-light border-0 shadow-sm">
+                                        <div class="card-body p-2"><small class="text-muted fw-bold">MEDIA PASSI</small>
+                                            <h5 class="mb-0 text-success fw-bold" id="avgPassi">-</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="card bg-light border-0 shadow-sm">
+                                        <div class="card-body p-2"><small class="text-muted fw-bold">MINUTI
+                                                ATTIVI</small>
+                                            <h5 class="mb-0 text-warning text-dark fw-bold" id="avgAttivita">-</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="card bg-light border-0 shadow-sm">
+                                        <div class="card-body p-2"><small class="text-muted fw-bold">MINUTI
+                                                SONNO</small>
+                                            <h5 class="mb-0 text-purple fw-bold" id="avgSonno">-</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6 mb-4">
+                                    <h6 class="text-center text-secondary">Frequenza Cardiaca (BPM)</h6>
+                                    <div class="chart-container"><canvas id="chartBPM"></canvas></div>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <h6 class="text-center text-secondary">Saturazione Ossigeno (SpO2)</h6>
+                                    <div class="chart-container"><canvas id="chartSpO2"></canvas></div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6 mb-4">
+                                    <h6 class="text-center text-secondary">Passi Totali</h6>
+                                    <div class="chart-container"><canvas id="chartPassi"></canvas></div>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <h6 class="text-center text-secondary">Minuti Attivi</h6>
+                                    <div class="chart-container"><canvas id="chartMinutiAttivi"></canvas></div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <h6 class="text-center text-secondary">Riposo Notturno (Minuti di Sonno)</h6>
+                                    <div class="chart-container-sleep"><canvas id="chartSonno"></canvas></div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalStoricoCompleto" tabindex="-1" aria-labelledby="modalStoricoCompletoLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold" id="modalStoricoCompletoLabel">
+                        <i class="bi bi-clock-history me-2"></i> Storico Completo Biometrico
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body bg-light">
+                    <div id="loaderStorico" class="text-center py-5">
+                        <div class="spinner-border text-danger" role="status">
+                            <span class="visually-hidden">Caricamento...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Recupero dello storico completo in corso...</p>
+                    </div>
+
+                    <div id="containerStoricoCompleto" class="d-none">
+
+                        <div class="row text-center g-2 mb-4">
+                            <div class="col">
+                                <div class="card bg-white border-0 shadow-sm">
+                                    <div class="card-body p-2"><small class="text-muted fw-bold">MEDIA BPM (TOT)</small>
+                                        <h5 class="mb-0 text-danger fw-bold" id="avgBpmCompleto">-</h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="card bg-white border-0 shadow-sm">
+                                    <div class="card-body p-2"><small class="text-muted fw-bold">MEDIA SpO2
+                                            (TOT)</small>
+                                        <h5 class="mb-0 text-primary fw-bold" id="avgSpo2Completo">-</h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="card bg-white border-0 shadow-sm">
+                                    <div class="card-body p-2"><small class="text-muted fw-bold">MEDIA PASSI
+                                            (TOT)</small>
+                                        <h5 class="mb-0 text-success fw-bold" id="avgPassiCompleto">-</h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="card bg-white border-0 shadow-sm">
+                                    <div class="card-body p-2"><small class="text-muted fw-bold">MINUTI ATTIVI
+                                            (TOT)</small>
+                                        <h5 class="mb-0 text-warning text-dark fw-bold" id="avgAttivitaCompleta">-</h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="card bg-white border-0 shadow-sm">
+                                    <div class="card-body p-2"><small class="text-muted fw-bold">MINUTI SONNO
+                                            (TOT)</small>
+                                        <h5 class="mb-0 text-purple fw-bold" id="avgSonnoCompleto">-</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+                                        <h6 class="text-center text-secondary mb-3">Frequenza Cardiaca (Storico)</h6>
+                                        <div class="chart-container"><canvas id="chartBPMCompleto"></canvas></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+                                        <h6 class="text-center text-secondary mb-3">Saturazione Ossigeno (Storico)</h6>
+                                        <div class="chart-container"><canvas id="chartSpO2Completo"></canvas></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+                                        <h6 class="text-center text-secondary mb-3">Passi Totali (Storico)</h6>
+                                        <div class="chart-container"><canvas id="chartPassiCompleto"></canvas></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+                                        <h6 class="text-center text-secondary mb-3">Minuti Attivi (Storico)</h6>
+                                        <div class="chart-container"><canvas id="chartMinutiAttiviCompleto"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+                                        <h6 class="text-center text-secondary mb-3">Riposo Notturno (Storico)</h6>
+                                        <div class="chart-container"><canvas id="chartSonnoCompleto"></canvas></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title fw-bold" id="editModalLabel">Modifica Dati Logistici: {{ paziente.id }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/paziente/{{ paziente.id }}/modifica" method="POST">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-4"><label class="form-label">Nazione</label><input type="text"
+                                    class="form-control" name="nazione" value="{{ paziente.nazione or '' }}"></div>
+                            <div class="col-md-4"><label class="form-label">Regione</label><input type="text"
+                                    class="form-control" name="regione" value="{{ paziente.regione or '' }}"></div>
+                            <div class="col-md-4"><label class="form-label">Provincia</label><input type="text"
+                                    class="form-control" name="provincia" value="{{ paziente.provincia or '' }}"></div>
+                            <div class="col-md-6"><label class="form-label">Latitudine</label><input type="number"
+                                    step="any" class="form-control" name="latitudine"
+                                    value="{{ paziente.latitudine or '' }}"></div>
+                            <div class="col-md-6"><label class="form-label">Longitudine</label><input type="number"
+                                    step="any" class="form-control" name="longitudine"
+                                    value="{{ paziente.longitudine or '' }}"></div>
+                            <div class="col-md-6"><label class="form-label">Fuso Orario</label><input type="text"
+                                    class="form-control" name="fuso_orario" value="{{ paziente.fuso_orario or '' }}">
+                            </div>
+                            <div class="col-md-6"><label class="form-label">Data Attivazione</label><input type="text"
+                                    class="form-control" name="data_attivazione"
+                                    value="{{ paziente.data_attivazione or '' }}"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                        <button type="submit" class="btn btn-primary">Salva Modifiche</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/profilo.js') }}"></script>
+</body>
+
+</html>
