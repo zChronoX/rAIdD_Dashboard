@@ -11,7 +11,7 @@
 ![Leaflet](https://img.shields.io/badge/Leaflet-199903?style=for-the-badge&logo=Leaflet&logoColor=white)
 ![Jinja2](https://img.shields.io/badge/jinja-%23b41717.svg?style=for-the-badge&logo=jinja&logoColor=white)
 
-# rAIdD - Piattaforma di Monitoraggio Dispositivi Wearable
+# rAIdD - Dashboard per il Monitoraggio Dispositivi Wearable
 
 Questa è l'applicazione web per la gestione logistica e l'analisi della telemetria dei dispositivi wearable (Fitbit Inspire 3) del progetto rAIdD. 
 Il sistema è interamente containerizzato: questo significa che **non è necessario installare Python, PostgreSQL o configurare database locali** per testare il progetto. L'infrastruttura viene orchestrata automaticamente da Docker.
